@@ -1,7 +1,6 @@
-# PyTorch-YOLOv3
-A minimal PyTorch implementation of YOLOv3, with support for training, inference and evaluation.
+# PyTorch-HemeYolo
 
-[![CI](https://github.com/eriklindernoren/PyTorch-YOLOv3/actions/workflows/main.yml/badge.svg)](https://github.com/eriklindernoren/PyTorch-YOLOv3/actions/workflows/main.yml) [![PyPI pyversions](https://img.shields.io/pypi/pyversions/pytorchyolo.svg)](https://pypi.python.org/pypi/pytorchyolo/) [![PyPI license](https://img.shields.io/pypi/l/pytorchyolo.svg)](LICENSE)
+This package is heavily adapted from https://github.com/eriklindernoren/PyTorch-YOLOv3.git. 
 
 ## Installation
 ### Installing from source
@@ -9,8 +8,8 @@ A minimal PyTorch implementation of YOLOv3, with support for training, inference
 For normal training and evaluation we recommend installing the package from source using a poetry virtual environment.
 
 ```bash
-git clone https://github.com/eriklindernoren/PyTorch-YOLOv3
-cd PyTorch-YOLOv3/
+git clone https://github.com/goldgoflab/HemeYolo.git
+cd HemeYolo/
 pip3 install poetry --user
 poetry install
 ```
@@ -104,7 +103,9 @@ You can adjust the log directory using `--logdir <path>` when running `tensorboa
 
 #### Custom model
 Run the commands below to create a custom model definition, replacing `<num-classes>` with the number of classes in your dataset.
-
+For our case, we just choose num_classes equal to 1. 
+Yolo typically has two function: detection and classification. 
+But for our case, just making it **num_classes = 1**, so that it only work as an object detector. 
 ```bash
 ./config/create_custom_model.sh <num-classes>  # Will create custom model 'yolov3-custom.cfg'
 ```
