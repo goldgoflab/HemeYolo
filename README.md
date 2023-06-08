@@ -8,15 +8,96 @@ This package is heavily adapted from https://github.com/eriklindernoren/PyTorch-
 For normal training and evaluation we recommend installing the package from source using a poetry virtual environment.
 
 ```bash
+# create a new env
+conda create -n HemeYolo python=3.8.13
+
 git clone https://github.com/goldgoflab/HemeYolo.git
 cd HemeYolo/
 pip3 install poetry --user
 poetry install
+
+pip install -r requirements.txt
 ```
 
 You need to join the virtual environment by running `poetry shell` in this directory before running any of the following commands without the `poetry run` prefix.
 Also have a look at the other installing method, if you want to use the commands everywhere without opening a poetry-shell.
 
+
+## Train on Custom Dataset 
+
+#### Simplist version to just make it running
+Put the _images_ and _labels_ folder that I sent to you under the data/custom, then you are all set in order to run the trail data. 
+You will need to adjust it according on the new data that I send to you in order to train a better yolo model 
+Then you can just run this.
+```bash
+poetry run yolo-train --model config/yolov3-custom.cfg --data config/custom.data
+```
+
+You can look into all the things below when preparing the latest dataset for running YOLO. 
+#### Custom model 
+Run the commands below to create a custom model definition, replacing `<num-classes>` with the number of classes in your dataset.
+For our case, we just choose num_classes equal to 1. 
+Yolo typically has two function: detection and classification. 
+But for our case, just making it **num_classes = 1**, so that it only work as an object detector. 
+```bash
+./config/create_custom_model.sh <num-classes>  # Will create custom model 'yolov3-custom.cfg'
+```
+
+#### Classes 
+Add class names to `data/custom/classes.names`. This file should have one row per class name.
+
+#### Image Folder 
+Move the images of your dataset to `data/custom/images/`.
+
+#### Annotation Folder 
+Move your annotations to `data/custom/labels/`. The dataloader expects that the annotation file corresponding to the image `data/custom/images/train.jpg` has the path `data/custom/labels/train.txt`. Each row in the annotation file should define one bounding box, using the syntax `label_idx x_center y_center width height`. The coordinates should be scaled `[0, 1]`, and the `label_idx` should be zero-indexed and correspond to the row number of the class name in `data/custom/classes.names`.
+
+#### Define Train and Validation Sets 
+In `data/custom/train.txt` and `data/custom/valid.txt`, add paths to images that will be used as train and validation data respectively.
+
+#### Train
+To train on the custom dataset run:
+
+```bash
+poetry run yolo-train --model config/yolov3-custom.cfg --data config/custom.data
+```
+
+Add `--pretrained_weights weights/darknet53.conv.74` to train using a backend pretrained on ImageNet.
+
+
+## API
+
+You are able to import the modules of this repo in your own project if you install the pip package `pytorchyolo`.
+
+An example prediction call from a simple OpenCV python script would look like this:
+
+```python
+import cv2
+from pytorchyolo import detect, models
+
+# Load the YOLO model
+model = models.load_model(
+  "<PATH_TO_YOUR_CONFIG_FOLDER>/yolov3.cfg", 
+  "<PATH_TO_YOUR_WEIGHTS_FOLDER>/yolov3.weights")
+
+# Load the image as a numpy array
+img = cv2.imread("<PATH_TO_YOUR_IMAGE>")
+
+# Convert OpenCV bgr to rgb
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+# Runs the YOLO model on the image 
+boxes = detect.detect_image(model, img)
+
+print(boxes)
+# Output will be a numpy array in the following format:
+# [[x1, y1, x2, y2, confidence, class]]
+```
+
+For more advanced usage look at the method's doc strings.
+
+
+### (Optional) Play with it on public natural dataset
 #### Download pretrained weights
 
 ```bash
@@ -98,70 +179,6 @@ poetry run tensorboard --logdir='logs' --port=6006
 Storing the logs on a slow drive possibly leads to a significant training speed decrease.
 
 You can adjust the log directory using `--logdir <path>` when running `tensorboard` and `yolo-train`.
-
-## Train on Custom Dataset
-
-#### Custom model
-Run the commands below to create a custom model definition, replacing `<num-classes>` with the number of classes in your dataset.
-For our case, we just choose num_classes equal to 1. 
-Yolo typically has two function: detection and classification. 
-But for our case, just making it **num_classes = 1**, so that it only work as an object detector. 
-```bash
-./config/create_custom_model.sh <num-classes>  # Will create custom model 'yolov3-custom.cfg'
-```
-
-#### Classes
-Add class names to `data/custom/classes.names`. This file should have one row per class name.
-
-#### Image Folder
-Move the images of your dataset to `data/custom/images/`.
-
-#### Annotation Folder
-Move your annotations to `data/custom/labels/`. The dataloader expects that the annotation file corresponding to the image `data/custom/images/train.jpg` has the path `data/custom/labels/train.txt`. Each row in the annotation file should define one bounding box, using the syntax `label_idx x_center y_center width height`. The coordinates should be scaled `[0, 1]`, and the `label_idx` should be zero-indexed and correspond to the row number of the class name in `data/custom/classes.names`.
-
-#### Define Train and Validation Sets
-In `data/custom/train.txt` and `data/custom/valid.txt`, add paths to images that will be used as train and validation data respectively.
-
-#### Train
-To train on the custom dataset run:
-
-```bash
-poetry run yolo-train --model config/yolov3-custom.cfg --data config/custom.data
-```
-
-Add `--pretrained_weights weights/darknet53.conv.74` to train using a backend pretrained on ImageNet.
-
-
-## API
-
-You are able to import the modules of this repo in your own project if you install the pip package `pytorchyolo`.
-
-An example prediction call from a simple OpenCV python script would look like this:
-
-```python
-import cv2
-from pytorchyolo import detect, models
-
-# Load the YOLO model
-model = models.load_model(
-  "<PATH_TO_YOUR_CONFIG_FOLDER>/yolov3.cfg", 
-  "<PATH_TO_YOUR_WEIGHTS_FOLDER>/yolov3.weights")
-
-# Load the image as a numpy array
-img = cv2.imread("<PATH_TO_YOUR_IMAGE>")
-
-# Convert OpenCV bgr to rgb
-img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-# Runs the YOLO model on the image 
-boxes = detect.detect_image(model, img)
-
-print(boxes)
-# Output will be a numpy array in the following format:
-# [[x1, y1, x2, y2, confidence, class]]
-```
-
-For more advanced usage look at the method's doc strings.
 
 ## Credit
 
