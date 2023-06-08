@@ -10,7 +10,7 @@ For normal training and evaluation we recommend installing the package from sour
 ```bash
 # create a new env
 conda create -n HemeYolo python=3.8.13
-
+conda activate HemeYolo
 git clone https://github.com/goldgoflab/HemeYolo.git
 cd HemeYolo/
 pip3 install poetry --user
